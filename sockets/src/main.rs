@@ -18,18 +18,20 @@ fn handle_connection(mut stream: TcpStream) {
   let mut buffer = [0 as u8; 50];
 
   // Read all data
-  match stream.read(&mut buffer) {
-    Ok(size) => {
-      println!("handled");
-      println!("{}", str::from_utf8(&buffer[0..size]).unwrap());
-      stream.write(&buffer[0..size]).unwrap();
+  loop {
+    match stream.read(&mut buffer) {
+      Ok(size) => {
+        println!("handled");
+        println!("{}", str::from_utf8(&buffer[0..size]).unwrap());
+        stream.write(&buffer[0..size]).unwrap();
+      }
+      Err(_) => {
+        println!("Error");
+        //stream.shutdown(Shutdown::Both).unwrap();
+      }
     }
-    Err(_) => {
-      println!("Error");
-      //stream.shutdown(Shutdown::Both).unwrap();
-    }
+    {}
   }
-  {}
 
   //stream.write(response.as_bytes()).unwrap();
   stream.flush().unwrap();
