@@ -10,11 +10,13 @@ fn main() {
     // 127.0.0.1 is address, 7878 is port
     let mut stream = match TcpStream::connect("127.0.0.1:7878") {
         Ok(stream) => {
-            println!("Successfully connected to chat. Write a message and press enter!");
+            println!(
+                "\x1b[32mSuccessfully connected client to chat. Write a message and press enter!\x1b[0m"
+            );
             stream // Return unwraped stream
         }
         Err(_) => {
-            println!("Error when connecting to stream");
+            println!("\x1b[31mError when connecting to stream\x1b[0m");
             exit(0); // Shut down program
         }
     };
@@ -27,9 +29,14 @@ fn main() {
             stdin().read_line(&mut input).unwrap();
             match stream_copy.write(input.as_bytes()) {
                 Ok(_) => {
+                    // Print your own messages
                     print!(
                         "{}",
-                        format!("YOU ({}): {}", Local::now().format("%H:%M"), input)
+                        format!(
+                            "\x1b[33mYOU ({})\x1b[0m: {}",
+                            Local::now().format("%H:%M"),
+                            input
+                        )
                     )
                 }
                 Err(_) => {
@@ -40,7 +47,7 @@ fn main() {
         }
     });
 
-    // Print messages
+    // Print messages from other clients
     loop {
         let mut buffer = [0; 1024];
         match stream.read(&mut buffer) {

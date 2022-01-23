@@ -2,6 +2,7 @@ use chrono::Local;
 use std::io::prelude::*;
 use std::io::ErrorKind;
 use std::net::{Shutdown, TcpListener, TcpStream};
+use std::process::exit;
 use std::str;
 use std::sync::mpsc;
 use std::sync::mpsc::Sender;
@@ -10,7 +11,18 @@ use std::time;
 
 fn main() {
   // 127.0.0.1 is address, 7878 is port
-  let listener = TcpListener::bind("127.0.0.1:7878").unwrap();
+  let listener = match TcpListener::bind("127.0.0.1:7878") {
+    Ok(stream) => {
+      println!(
+        "\x1b[32mSuccessfully connected server to chat. All messages sent will appear here\x1b[0m"
+      );
+      stream // Return unwraped stream
+    }
+    Err(_) => {
+      println!("\x1b[31mError when connecting to stream\x1b[0m");
+      exit(0); // Shut down program
+    }
+  };
   let (send, recieve) = mpsc::channel();
   let (send_index, recieve_index) = mpsc::channel();
   let mut streams = Vec::new();
@@ -23,6 +35,8 @@ fn main() {
     // Listen for clients
     match listener.accept() {
       Ok((stream, _)) => {
+        println!("\x1b[32mSuccessfully connected a new client to the chat\x1b[0m");
+
         streams.push(stream.try_clone().unwrap());
         if stream_index == 100 {
           stream_index = 0;
@@ -45,14 +59,24 @@ fn main() {
       match recieve.try_recv() {
         Ok(message) => {
           if message.len() > 0 {
-            println!("{}", message);
             let source_stream_index = recieve_index.recv().unwrap();
-            println!("{:?}", source_stream_index);
+            // Print to console (message already contains \n)
+            print!(
+              "{}",
+              format!(
+                "\x1b[34mCLIENT {} ({})\x1b[0m: {}",
+                source_stream_index,
+                Local::now().format("%H:%M"),
+                message
+              )
+            );
+
+            // Send to all clients except the source
             for i in 0..(&streams).len() {
               if i != source_stream_index {
                 match streams[i].write(
                   format!(
-                    "CLIENT {} ({}): {}",
+                    "\x1b[34mCLIENT {} ({})\x1b[0m: {}",
                     source_stream_index,
                     Local::now().format("%H:%M"),
                     message
@@ -68,6 +92,7 @@ fn main() {
             }
           }
         }
+        // Let more clients connect after all messages have been said
         Err(_) => break,
       }
 
@@ -88,16 +113,13 @@ fn handle_connection(
   loop {
     match stream.read(&mut buffer) {
       Ok(0) => {
-        println!("Connection has been closed");
+        println!("\x1b[31mConnection to a client has been closed\x1b[0m");
         stream.shutdown(Shutdown::Both).unwrap();
         break;
       }
       Ok(size) => {
         let message = str::from_utf8(&buffer[0..size]).unwrap();
-        println!(
-          "Message has been recieved on server: {} by {}",
-          message, stream_index
-        );
+        // Send message and client index to main thread
         send.send(message.to_owned()).unwrap();
         send_index.send(stream_index).unwrap();
       }
@@ -107,7 +129,7 @@ fn handle_connection(
           continue;
         }
 
-        println!("Connection has been closed");
+        println!("\x1b[31mConnection to a client has been closed\x1b[0m");
         stream.shutdown(Shutdown::Both).unwrap();
         break;
       }
