@@ -1,4 +1,4 @@
-use chrono::Utc;
+use chrono::Local;
 use std::io::prelude::*;
 use std::io::stdin;
 use std::net::TcpStream;
@@ -29,7 +29,7 @@ fn main() {
                 Ok(_) => {
                     print!(
                         "{}",
-                        format!("YOU ({}): {}", Utc::now().format("%H:%M"), input)
+                        format!("YOU ({}): {}", Local::now().format("%H:%M"), input)
                     )
                 }
                 Err(_) => {

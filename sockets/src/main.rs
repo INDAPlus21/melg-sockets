@@ -1,10 +1,10 @@
-use chrono::Utc;
+use chrono::Local;
 use std::io::prelude::*;
 use std::io::ErrorKind;
 use std::net::{Shutdown, TcpListener, TcpStream};
 use std::str;
 use std::sync::mpsc;
-use std::sync::mpsc::{Receiver, Sender};
+use std::sync::mpsc::Sender;
 use std::thread;
 use std::time;
 
@@ -54,7 +54,7 @@ fn main() {
                   format!(
                     "CLIENT {} ({}): {}",
                     source_stream_index,
-                    Utc::now().format("%H:%M"),
+                    Local::now().format("%H:%M"),
                     message
                   )
                   .as_bytes(),
