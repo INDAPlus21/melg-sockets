@@ -12,26 +12,26 @@ Send a chat: write something in the terminal and press enter
 
 Send private chat: prefix with the index of the reciever, for example 1SECRET will send "SECRET" only to client 1
 
-Send coloured chats: Chats can contain colour codes which are prefixed with * the available options are:
+Send coloured chats: Chats can contain colour codes which are prefixed with \* the available options are:
 
-*b = Blue
+\*b = Blue
 
-*bl = Black
+\*bl = Black
 
-*r = Red
+\*r = Red
 
-*m = Magenta
+\*m = Magenta
 
-*y = Yellow
+\*y = Yellow
 
-*w = White
+\*w = White
 
-*c = Cyan
+\*c = Cyan
 
-*g = Green
+\*g = Green
 
-*0 = Reset
+\*0 = Reset
 
 For example:
 
-This is a *bc*ro*yl*mo*cu*gr*ble*wd *0example
+This is a \*bc\*ro\*yl\*mo\*cu\*gr\*ble\*wd \*0example
