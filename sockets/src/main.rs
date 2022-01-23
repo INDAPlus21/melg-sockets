@@ -82,7 +82,7 @@ fn handle_connection(
   send_index: Sender<usize>,
   stream_index: usize,
 ) {
-  let mut buffer = [0 as u8; 50];
+  let mut buffer = [0 as u8; 1024];
 
   // Always listen for data
   loop {
