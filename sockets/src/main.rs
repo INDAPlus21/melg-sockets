@@ -64,7 +64,7 @@ fn main() {
             print!(
               "{}",
               format!(
-                "\x1b[34mCLIENT {} ({})\x1b[0m: {}",
+                "\x1b[34mCLIENT {} ({}):\x1b[0m {}",
                 source_stream_index,
                 Local::now().format("%H:%M"),
                 message
@@ -81,7 +81,7 @@ fn main() {
 
               match streams[i].write(
                 format!(
-                  "{} ({})\x1b[0m: {}",
+                  "{} ({}):\x1b[0m {}",
                   prefix,
                   Local::now().format("%H:%M"),
                   message
