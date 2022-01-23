@@ -67,7 +67,7 @@ fn main() {
                 "\x1b[34mCLIENT {} ({}):\x1b[0m {}",
                 source_stream_index,
                 Local::now().format("%H:%M"),
-                message
+                format_message(&message)
               )
             );
 
@@ -84,7 +84,7 @@ fn main() {
                   "{} ({}):\x1b[0m {}",
                   prefix,
                   Local::now().format("%H:%M"),
-                  message
+                  format_message(&message)
                 )
                 .as_bytes(),
               ) {
@@ -139,4 +139,18 @@ fn handle_connection(
       }
     }
   }
+}
+
+// Replaces colours with actual colour commands and resets the colour afterwards
+fn format_message(message: &String) -> String {
+  message
+    .replace("*bl", "\x1b[30m")
+    .replace("*r", "\x1b[31m")
+    .replace("*g", "\x1b[32m")
+    .replace("*y", "\x1b[33m")
+    .replace("*b", "\x1b[34m")
+    .replace("*m", "\x1b[35m")
+    .replace("*c", "\x1b[36m")
+    .replace("*w", "\x1b[37m")
+    .replace("*0", "\x1b[0m")
 }

@@ -26,7 +26,11 @@ fn main() {
         loop {
             let mut input = String::new();
             stdin().read_line(&mut input).unwrap();
-            match stream_copy.write(input.as_bytes()) {
+
+            // Reset colour before newline
+            input.pop();
+            input.pop();
+            match stream_copy.write(format!("{}*0\n", input).as_bytes()) {
                 Ok(_) => {}
                 Err(_) => {
                     // Exit if server has closed
