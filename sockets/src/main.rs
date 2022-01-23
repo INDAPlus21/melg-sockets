@@ -73,20 +73,24 @@ fn main() {
 
             // Send to all clients except the source
             for i in 0..(&streams).len() {
+              let mut prefix = String::from("\x1b[33mYOU");
+
               if i != source_stream_index {
-                match streams[i].write(
-                  format!(
-                    "\x1b[34mCLIENT {} ({})\x1b[0m: {}",
-                    source_stream_index,
-                    Local::now().format("%H:%M"),
-                    message
-                  )
-                  .as_bytes(),
-                ) {
-                  Ok(_) => {}
-                  Err(_) => {
-                    // Don't crash when disconnecting stream. Don't remove from array as that messes up the thread indexes
-                  }
+                prefix = format!("\x1b[34mCLIENT {}", source_stream_index);
+              }
+
+              match streams[i].write(
+                format!(
+                  "{} ({})\x1b[0m: {}",
+                  prefix,
+                  Local::now().format("%H:%M"),
+                  message
+                )
+                .as_bytes(),
+              ) {
+                Ok(_) => {}
+                Err(_) => {
+                  // Don't crash when disconnecting stream. Don't remove from array as that messes up the thread indexes
                 }
               }
             }

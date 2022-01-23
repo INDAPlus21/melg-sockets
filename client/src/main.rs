@@ -28,17 +28,7 @@ fn main() {
             let mut input = String::new();
             stdin().read_line(&mut input).unwrap();
             match stream_copy.write(input.as_bytes()) {
-                Ok(_) => {
-                    // Print your own messages
-                    print!(
-                        "{}",
-                        format!(
-                            "\x1b[33mYOU ({})\x1b[0m: {}",
-                            Local::now().format("%H:%M"),
-                            input
-                        )
-                    )
-                }
+                Ok(_) => {}
                 Err(_) => {
                     // Exit if server has closed
                     break;
