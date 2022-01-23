@@ -74,9 +74,29 @@ fn main() {
             // Send to all clients except the source
             for i in 0..(&streams).len() {
               let mut prefix = String::from("\x1b[33mYOU");
+              let mut private = false;
 
               if i != source_stream_index {
                 prefix = format!("\x1b[34mCLIENT {}", source_stream_index);
+              }
+
+              // Private message
+              if message.chars().nth(0).unwrap().is_digit(10) {
+                let number = message.chars().nth(0).unwrap().to_digit(10).unwrap();
+
+                if i != source_stream_index && i != (number as usize) {
+                  continue; // Don't print
+                } else {
+                  prefix = format!("{} (PRIVATE)", prefix);
+                  private = true;
+                }
+              }
+
+              let mut formatted_message = format_message(&message);
+
+              // Remove private message index
+              if private {
+                formatted_message = formatted_message[1..].to_owned();
               }
 
               match streams[i].write(
@@ -84,7 +104,7 @@ fn main() {
                   "{} ({}):\x1b[0m {}",
                   prefix,
                   Local::now().format("%H:%M"),
-                  format_message(&message)
+                  formatted_message
                 )
                 .as_bytes(),
               ) {
