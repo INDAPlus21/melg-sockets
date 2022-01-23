@@ -1,3 +1,4 @@
+use chrono::Utc;
 use std::io::prelude::*;
 use std::io::ErrorKind;
 use std::net::{Shutdown, TcpListener, TcpStream};
@@ -49,9 +50,15 @@ fn main() {
             println!("{:?}", source_stream_index);
             for i in 0..(&streams).len() {
               if i != source_stream_index {
-                match streams[i]
-                  .write(format!("CLIENT {}: {}", source_stream_index, message).as_bytes())
-                {
+                match streams[i].write(
+                  format!(
+                    "CLIENT {} ({}): {}",
+                    source_stream_index,
+                    Utc::now().format("%H:%M"),
+                    message
+                  )
+                  .as_bytes(),
+                ) {
                   Ok(_) => {}
                   Err(_) => {
                     // Don't crash when disconnecting stream. Don't remove from array as that messes up the thread indexes
