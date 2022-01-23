@@ -14,8 +14,6 @@ fn main() {
     let mut stream_copy = stream.try_clone().unwrap();
     thread::spawn(move || {
         loop {
-            println!("Enter a message:");
-
             let mut input = String::new();
             stdin().read_line(&mut input).unwrap();
             match stream_copy.write(input.as_bytes()) {
@@ -27,8 +25,6 @@ fn main() {
                     break;
                 }
             }
-
-            thread::sleep(time::Duration::from_secs(1));
         }
     });
 
@@ -38,11 +34,9 @@ fn main() {
         match stream.read(&mut buffer) {
             Ok(0) => {}
             Ok(size) => {
-                println!("Returned: {}", str::from_utf8(&buffer[0..size]).unwrap());
+                print!("{}", str::from_utf8(&buffer[0..size]).unwrap());
             }
             Err(_) => {}
         }
-
-        thread::sleep(time::Duration::from_secs(1));
     }
 }

@@ -13,7 +13,7 @@ fn main() {
   let (send, recieve) = mpsc::channel();
   let (send_index, recieve_index) = mpsc::channel();
   let mut streams = Vec::new();
-  let mut stream_index = 100;
+  let mut stream_index = 100; // usize can't be -1 so use 100 instead
 
   listener.set_nonblocking(true).unwrap(); // Prevent listener.accept blocking the thread
 
@@ -21,7 +21,7 @@ fn main() {
   loop {
     // Listen for clients
     match listener.accept() {
-      Ok((mut stream, _)) => {
+      Ok((stream, _)) => {
         streams.push(stream.try_clone().unwrap());
         if stream_index == 100 {
           stream_index = 0;
@@ -49,7 +49,14 @@ fn main() {
             println!("{:?}", source_stream_index);
             for i in 0..(&streams).len() {
               if i != source_stream_index {
-                streams[i].write(message.as_bytes()).unwrap();
+                match streams[i]
+                  .write(format!("CLIENT {}: {}", source_stream_index, message).as_bytes())
+                {
+                  Ok(_) => {}
+                  Err(_) => {
+                    // Don't crash when disconnecting stream. Don't remove from array as that messes up the thread indexes
+                  }
+                }
               }
             }
           }
@@ -93,13 +100,10 @@ fn handle_connection(
           continue;
         }
 
-        println!("{:?}", e);
         println!("Connection has been closed");
         stream.shutdown(Shutdown::Both).unwrap();
         break;
       }
     }
-
-    thread::sleep(time::Duration::from_secs(1));
   }
 }
