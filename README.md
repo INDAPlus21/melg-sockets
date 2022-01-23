@@ -35,3 +35,20 @@ Send coloured chats: Chats can contain colour codes which are prefixed with \* t
 For example:
 
 This is a \*bc\*ro\*yl\*mo\*cu\*gr\*ble\*wd \*0example
+
+Send emojis:
+
+There is support for a limited amount of emojis:
+
+:wave = 👋
+:ok = 👌
+:clap = 👏
+<3 = 💓
+:) = 🙂
+:D = 😃
+:c = 🙁
+;c = 😢
+:P = 😛
+;P = 😜
+:O = 😮
+:/ = 😕

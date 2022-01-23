@@ -161,16 +161,39 @@ fn handle_connection(
   }
 }
 
+static FORMATTING: [(&str, &str); 22] = [
+  // Colours
+  ("*bl", "\x1b[30m"),
+  ("*r", "\x1b[31m"),
+  ("*g", "\x1b[32m"),
+  ("*y", "\x1b[33m"),
+  ("*y", "\x1b[33m"),
+  ("*b", "\x1b[34m"),
+  ("*m", "\x1b[35m"),
+  ("*c", "\x1b[36m"),
+  ("*w", "\x1b[37m"),
+  ("*0", "\x1b[0m"),
+  // Emojis
+  (":wave", "👋"),
+  (":ok", "👌"),
+  (":clap", "👏"),
+  ("<3", "💓"),
+  (":)", "🙂"),
+  (":D", "😃"),
+  (":c", "🙁"),
+  (";c", "😢"),
+  (":P", "😛"),
+  (";P", "😜"),
+  (":O", "😮"),
+  (":/", "😕"),
+];
+
 // Replaces colours with actual colour commands and resets the colour afterwards
 fn format_message(message: &String) -> String {
-  message
-    .replace("*bl", "\x1b[30m")
-    .replace("*r", "\x1b[31m")
-    .replace("*g", "\x1b[32m")
-    .replace("*y", "\x1b[33m")
-    .replace("*b", "\x1b[34m")
-    .replace("*m", "\x1b[35m")
-    .replace("*c", "\x1b[36m")
-    .replace("*w", "\x1b[37m")
-    .replace("*0", "\x1b[0m")
+  let mut formatted_message = message.to_owned();
+  for formatting_rule in &FORMATTING {
+    formatted_message = formatted_message.replace(formatting_rule.0, formatting_rule.1);
+  }
+
+  formatted_message
 }
