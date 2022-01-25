@@ -33,73 +33,70 @@ fn main() {
   // Main loop
   loop {
     // Listen for clients
-    match listener.accept() {
-      Ok((stream, _)) => {
-        println!("\x1b[32mSuccessfully connected a new client to the chat\x1b[0m");
+    if let Ok((stream, _)) = listener.accept() {
+      println!("\x1b[32mSuccessfully connected a new client to the chat\x1b[0m");
 
-        streams.push(stream.try_clone().unwrap());
-        if stream_index == 100 {
-          stream_index = 0;
-        } else {
-          stream_index += 1;
-        }
-
-        let local_sender = send.clone();
-        let local_index_sender = send_index.clone();
-
-        thread::spawn(move || {
-          handle_connection(stream, local_sender, local_index_sender, stream_index);
-        });
+      streams.push(stream.try_clone().unwrap());
+      if stream_index == 100 {
+        stream_index = 0;
+      } else {
+        stream_index += 1;
       }
-      Err(_) => {}
+
+      let local_sender = send.clone();
+      let local_index_sender = send_index.clone();
+
+      thread::spawn(move || {
+        handle_connection(stream, local_sender, local_index_sender, stream_index);
+      });
     }
 
     // Go through all threads and send them the message that the server recieved
     loop {
-      match recieve.try_recv() {
-        Ok(message) => {
-          if message.len() > 0 {
-            let source_stream_index = recieve_index.recv().unwrap();
-            // Print to console (message already contains \n)
-            print!(
-              "{}",
-              format!(
-                "\x1b[34mCLIENT {} ({}):\x1b[0m {}",
-                source_stream_index,
-                Local::now().format("%H:%M"),
-                format_message(&message)
-              )
-            );
+      if let Ok(message) = recieve.try_recv() {
+        if message.len() > 0 {
+          let source_stream_index = recieve_index.recv().unwrap();
+          // Print to console (message already contains \n)
+          print!(
+            "{}",
+            format!(
+              "\x1b[34mCLIENT {} ({}):\x1b[0m {}",
+              source_stream_index,
+              Local::now().format("%H:%M"),
+              format_message(&message)
+            )
+          );
 
-            // Send to all clients except the source
-            for i in 0..(&streams).len() {
-              let mut prefix = String::from("\x1b[33mYOU");
-              let mut private = false;
+          // Send to all clients except the source
+          for i in 0..(&streams).len() {
+            let mut prefix = String::from("\x1b[33mYOU");
+            let mut private = false;
 
-              if i != source_stream_index {
-                prefix = format!("\x1b[34mCLIENT {}", source_stream_index);
+            if i != source_stream_index {
+              prefix = format!("\x1b[34mCLIENT {}", source_stream_index);
+            }
+
+            // Private message
+            if message.chars().nth(0).unwrap().is_digit(10) {
+              let number = message.chars().nth(0).unwrap().to_digit(10).unwrap();
+
+              if i != source_stream_index && i != (number as usize) {
+                continue; // Don't print
+              } else {
+                prefix = format!("{} (PRIVATE)", prefix);
+                private = true;
               }
+            }
 
-              // Private message
-              if message.chars().nth(0).unwrap().is_digit(10) {
-                let number = message.chars().nth(0).unwrap().to_digit(10).unwrap();
+            let mut formatted_message = format_message(&message);
 
-                if i != source_stream_index && i != (number as usize) {
-                  continue; // Don't print
-                } else {
-                  prefix = format!("{} (PRIVATE)", prefix);
-                  private = true;
-                }
-              }
+            // Remove private message index
+            if private {
+              formatted_message = formatted_message[1..].to_owned();
+            }
 
-              let mut formatted_message = format_message(&message);
-
-              // Remove private message index
-              if private {
-                formatted_message = formatted_message[1..].to_owned();
-              }
-
-              match streams[i].write(
+            streams[i]
+              .write(
                 format!(
                   "{} ({}):\x1b[0m {}",
                   prefix,
@@ -107,17 +104,13 @@ fn main() {
                   formatted_message
                 )
                 .as_bytes(),
-              ) {
-                Ok(_) => {}
-                Err(_) => {
-                  // Don't crash when disconnecting stream. Don't remove from array as that messes up the thread indexes
-                }
-              }
-            }
+              )
+              .unwrap_or(0);
           }
         }
+      } else {
         // Let more clients connect after all messages have been said
-        Err(_) => break,
+        break;
       }
 
       thread::sleep(time::Duration::from_secs(1));

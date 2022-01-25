@@ -30,12 +30,9 @@ fn main() {
             // Reset colour before newline
             input.pop();
             input.pop();
-            match stream_copy.write(format!("{}*0\n", input).as_bytes()) {
-                Ok(_) => {}
-                Err(_) => {
-                    // Exit if server has closed
-                    break;
-                }
+            if let Err(_) = stream_copy.write(format!("{}*0\n", input).as_bytes()) {
+                // Exit if server has closed
+                break;
             }
         }
     });
